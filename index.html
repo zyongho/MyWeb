@@ -145,9 +145,9 @@
 <body>
 <div class="page">
   <header>
-    <p class="eyebrow">focus/ · zyongho/DieFile</p>
+    <p class="eyebrow">DieFile</p>
     <h1>DieFile 메모함</h1>
-    <p class="lede"> 이 페이지에 코멘트를 남겨두면, GitHub 저장소의 비공개 Issue로 저장됩니다. </p>
+    <p class="lede"> </p>
   </header>
 
   <div id="errorBanner" class="banner error"></div>
@@ -155,7 +155,7 @@
 
   <div id="setup" class="card setup">
     <label class="field-label">GitHub 토큰</label>
-    <p>이 저장소(zyongho/DieFile) 전용 토큰이 필요합니다. 한 번만 설정하면 이 브라우저에 저장됩니다.</p>
+    <p>이 저장소 전용 토큰이 필요합니다. 한 번만 설정하면 이 브라우저에 저장됩니다.</p>
     <ol>
       <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a> 접속 (로그인 필요)</li>
       <li>Repository access → <code>Only select repositories</code> → <code>zyongho/DieFile</code> 선택</li>
@@ -174,11 +174,11 @@
   <div id="app">
     <div class="card composer">
       <label class="field-label" for="composeTag">태그 (선택)</label>
-      <input type="text" id="composeTag" placeholder="예: focus/Mercury, BallMap, 버그">
+      <input type="text" id="composeTag" placeholder="예: VBA수정, 버그리포트">
       <label class="field-label" for="composeText">메모</label>
-      <textarea id="composeText" placeholder="여기에 코드 조각이나 코멘트를 적어주세요."></textarea>
+      <textarea id="composeText" placeholder="코멘트 기입 란."></textarea>
       <div class="composer-footer">
-        <span class="hint">Ctrl/Cmd + Enter로도 남길 수 있어요</span>
+        <span class="hint">Ctrl/Cmd + Enter로도 입력 가능</span>
         <button class="primary" id="submitBtn" type="button">메모 남기기</button>
       </div>
     </div>
@@ -190,7 +190,7 @@
   </div>
 
   <footer id="appFooter" style="display:none">
-    <span class="warn">공용 컴퓨터라면 나가기 전에 토큰을 지워주세요.</span>
+    <span class="warn">나가기 전에 토큰 삭제하기.</span>
     <button class="ghost" id="clearTokenBtn" type="button">토큰 삭제</button>
   </footer>
 </div>
