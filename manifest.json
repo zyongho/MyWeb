@@ -1,0 +1,14 @@
+{
+  "name": "DieFile 메모함",
+  "short_name": "DieFile",
+  "description": "DieFile 프로젝트에 어디서든 코드/코멘트를 남기는 메모함",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d1210",
+  "theme_color": "#12201b",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
