@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DieFile 메모함</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef1ee;
+    --surface: #ffffff;
+    --surface-2: #e3e8e4;
+    --text: #14211c;
+    --text-dim: #58685f;
+    --accent: #a8631f;
+    --accent-ink: #ffffff;
+    --border: #cdd7d0;
+    --border-strong: #9fb0a5;
+    --danger: #9a4a3a;
+    --ok: #3f7d5c;
+    --font-display: 'IBM Plex Mono', 'Consolas', monospace;
+    --font-body: 'IBM Plex Sans KR', 'IBM Plex Sans', 'Pretendard', -apple-system, sans-serif;
+    --dot: rgba(20, 33, 28, 0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1210; --surface: #141c19; --surface-2: #1b2622;
+      --text: #e7ede8; --text-dim: #93a69b; --accent: #e2a45b; --accent-ink: #171009;
+      --border: #2a3733; --border-strong: #3d4d47; --danger: #e08a76; --ok: #74c79c;
+      --dot: rgba(226, 164, 91, 0.07);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1210; --surface: #141c19; --surface-2: #1b2622;
+    --text: #e7ede8; --text-dim: #93a69b; --accent: #e2a45b; --accent-ink: #171009;
+    --border: #2a3733; --border-strong: #3d4d47; --danger: #e08a76; --ok: #74c79c;
+    --dot: rgba(226, 164, 91, 0.07);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg);
+    background-image: radial-gradient(var(--dot) 1.4px, transparent 1.4px);
+    background-size: 22px 22px;
+    color: var(--text); font-family: var(--font-body); line-height: 1.55;
+    min-height: 100vh; padding: 48px 20px 80px;
+  }
+  .page { max-width: 640px; margin: 0 auto; }
+  header { margin-bottom: 28px; }
+  .eyebrow {
+    font-family: var(--font-display); font-size: 12px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent);
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .eyebrow::before { content: ""; width: 7px; height: 7px; background: var(--accent); display: inline-block; border-radius: 1px; }
+  h1 { font-family: var(--font-display); font-weight: 600; font-size: 26px; margin: 0 0 8px; text-wrap: balance; letter-spacing: -0.01em; }
+  .lede { color: var(--text-dim); font-size: 14.5px; max-width: 62ch; margin: 0; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+  .composer, .setup { padding: 18px; margin-bottom: 24px; }
+  label.field-label {
+    display: block; font-family: var(--font-display); font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;
+  }
+  textarea, input[type="text"], input[type="password"] {
+    width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text); font-family: var(--font-body); font-size: 14.5px; padding: 10px 12px; resize: vertical;
+  }
+  textarea { min-height: 96px; font-family: var(--font-display); font-size: 13.5px; line-height: 1.6; margin-bottom: 10px; }
+  input[type="text"] { margin-bottom: 10px; }
+  textarea:focus, input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .composer-footer { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 4px; }
+  .hint { font-size: 12.5px; color: var(--text-dim); margin-right: auto; }
+  button.primary {
+    font-family: var(--font-display); font-weight: 600; font-size: 13.5px; letter-spacing: 0.02em;
+    background: var(--accent); color: var(--accent-ink); border: none; border-radius: 6px;
+    padding: 10px 18px; cursor: pointer;
+  }
+  button.primary:hover { filter: brightness(1.06); }
+  button.primary:active { filter: brightness(0.94); }
+  button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.ghost {
+    font-family: var(--font-display); font-size: 12px; background: transparent; color: var(--text-dim);
+    border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; cursor: pointer;
+  }
+  button.ghost:hover { color: var(--danger); border-color: var(--danger); }
+  .section-label {
+    font-family: var(--font-display); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-dim); margin: 0 0 10px; display: flex; align-items: baseline; gap: 8px;
+  }
+  .section-label .count {
+    color: var(--text); background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 1px 8px; font-size: 11px;
+  }
+  ul#notesList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  li.note {
+    background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--border-strong);
+    border-radius: 8px; padding: 14px 16px;
+  }
+  li.note.closed { border-left-color: var(--ok); opacity: 0.62; }
+  .note-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+  .note-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+  .note-time { font-family: var(--font-display); font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .note-tag {
+    font-family: var(--font-display); font-size: 11px; letter-spacing: 0.03em; background: var(--surface-2);
+    border: 1px solid var(--border); color: var(--accent); border-radius: 4px; padding: 2px 7px;
+  }
+  .note-check {
+    display: flex; align-items: center; gap: 6px; font-family: var(--font-display); font-size: 11px;
+    color: var(--text-dim); cursor: pointer; white-space: nowrap; user-select: none;
+  }
+  .note-check input { accent-color: var(--ok); width: 14px; height: 14px; }
+  .note-text { font-family: var(--font-display); font-size: 13.5px; line-height: 1.65; white-space: pre-wrap; word-break: break-word; margin: 0; }
+  .empty-state, .loading-state {
+    text-align: center; color: var(--text-dim); font-size: 13.5px; padding: 32px 16px;
+    border: 1px dashed var(--border-strong); border-radius: 8px;
+  }
+  .banner {
+    display: none; align-items: center; gap: 8px; font-size: 13px; padding: 10px 14px; border-radius: 8px;
+    margin-bottom: 20px; font-family: var(--font-display);
+  }
+  .banner.show { display: flex; }
+  .banner.error { background: color-mix(in srgb, var(--danger) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--danger) 40%, var(--border)); color: var(--danger); }
+  .banner.saved { background: color-mix(in srgb, var(--ok) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--ok) 40%, var(--border)); color: var(--ok); }
+  .setup p { font-size: 13.5px; color: var(--text-dim); margin: 0 0 14px; }
+  .setup ol { font-size: 13px; color: var(--text-dim); padding-left: 20px; margin: 0 0 16px; }
+  .setup ol li { margin-bottom: 4px; }
+  .setup code { font-family: var(--font-display); background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 12px; }
+  .setup a { color: var(--accent); }
+  footer { margin-top: 32px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  footer .warn { font-size: 12px; color: var(--text-dim); }
+  #app { display: none; }
+  @media (prefers-reduced-motion: no-preference) { li.note { animation: rise 0.25s ease-out; } }
+  @keyframes rise { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <p class="eyebrow">focus/ · zyongho/DieFile</p>
+    <h1>DieFile 메모함</h1>
+    <p class="lede">어디서든 이 페이지에 코드 조각이나 코멘트를 남겨두면, GitHub 저장소의 비공개 Issue로 저장됩니다. claude.ai/텔레그램이 막힌 곳에서도 GitHub만 열리면 그대로 씁니다.</p>
+  </header>
+
+  <div id="errorBanner" class="banner error"></div>
+  <div id="savedBanner" class="banner saved">저장됐습니다.</div>
+
+  <div id="setup" class="card setup">
+    <label class="field-label">GitHub 토큰</label>
+    <p>이 저장소(zyongho/DieFile) 전용 토큰이 필요합니다. 한 번만 설정하면 이 브라우저에 저장됩니다.</p>
+    <ol>
+      <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a> 접속 (로그인 필요)</li>
+      <li>Repository access → <code>Only select repositories</code> → <code>zyongho/DieFile</code> 선택</li>
+      <li>Permissions → <code>Issues</code> → <code>Read and write</code> 선택</li>
+      <li>Expiration은 여행 기간 정도로 짧게 (예: 7~30일) 설정 권장</li>
+      <li>Generate token 후 나오는 <code>github_pat_...</code> 값을 아래에 붙여넣기</li>
+    </ol>
+    <label class="field-label" for="tokenInput">토큰 붙여넣기</label>
+    <input type="password" id="tokenInput" placeholder="github_pat_...">
+    <div class="composer-footer">
+      <span class="hint">이 기기에만 저장되고 GitHub API로만 전송됩니다</span>
+      <button class="primary" id="saveTokenBtn" type="button">저장</button>
+    </div>
+  </div>
+
+  <div id="app">
+    <div class="card composer">
+      <label class="field-label" for="composeTag">태그 (선택)</label>
+      <input type="text" id="composeTag" placeholder="예: focus/Mercury, BallMap, 버그">
+      <label class="field-label" for="composeText">메모</label>
+      <textarea id="composeText" placeholder="여기에 코드 조각이나 코멘트를 적어주세요."></textarea>
+      <div class="composer-footer">
+        <span class="hint">Ctrl/Cmd + Enter로도 남길 수 있어요</span>
+        <button class="primary" id="submitBtn" type="button">메모 남기기</button>
+      </div>
+    </div>
+
+    <p class="section-label">남긴 메모 <span class="count" id="noteCount">0</span></p>
+    <div class="loading-state" id="loadingState">불러오는 중...</div>
+    <ul id="notesList"></ul>
+    <div class="empty-state" id="emptyState" style="display:none">아직 남긴 메모가 없습니다.</div>
+  </div>
+
+  <footer id="appFooter" style="display:none">
+    <span class="warn">공용 컴퓨터라면 나가기 전에 토큰을 지워주세요.</span>
+    <button class="ghost" id="clearTokenBtn" type="button">토큰 삭제</button>
+  </footer>
+</div>
+
+<script>
+  const REPO = 'zyongho/DieFile';
+  const LABEL = 'diefile-memo';
+  const API = `https://api.github.com/repos/${REPO}/issues`;
+  const TOKEN_KEY = 'diefile_memo_token';
+
+  const setup = document.getElementById('setup');
+  const app = document.getElementById('app');
+  const appFooter = document.getElementById('appFooter');
+  const tokenInput = document.getElementById('tokenInput');
+  const saveTokenBtn = document.getElementById('saveTokenBtn');
+  const clearTokenBtn = document.getElementById('clearTokenBtn');
+  const composeText = document.getElementById('composeText');
+  const composeTag = document.getElementById('composeTag');
+  const submitBtn = document.getElementById('submitBtn');
+  const notesList = document.getElementById('notesList');
+  const emptyState = document.getElementById('emptyState');
+  const loadingState = document.getElementById('loadingState');
+  const noteCount = document.getElementById('noteCount');
+  const errorBanner = document.getElementById('errorBanner');
+  const savedBanner = document.getElementById('savedBanner');
+
+  function token() { return localStorage.getItem(TOKEN_KEY) || ''; }
+
+  function ghHeaders() {
+    return {
+      'Authorization': `Bearer ${token()}`,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    };
+  }
+
+  function showError(msg) {
+    errorBanner.textContent = msg;
+    errorBanner.classList.add('show');
+  }
+  function clearError() { errorBanner.classList.remove('show'); }
+
+  function flashSaved() {
+    savedBanner.classList.add('show');
+    clearTimeout(flashSaved._t);
+    flashSaved._t = setTimeout(() => savedBanner.classList.remove('show'), 1800);
+  }
+
+  function formatTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleString('ko-KR', {
+      year: '2-digit', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false,
+    }).replace(/\. /g, '-').replace('.', '').replace(',', '');
+  }
+
+  function renderNote(issue) {
+    const li = document.createElement('li');
+    li.className = 'note' + (issue.state === 'closed' ? ' closed' : '');
+    li.dataset.number = issue.number;
+
+    const top = document.createElement('div');
+    top.className = 'note-top';
+
+    const meta = document.createElement('div');
+    meta.className = 'note-meta';
+    const time = document.createElement('span');
+    time.className = 'note-time';
+    time.textContent = formatTime(issue.created_at);
+    meta.appendChild(time);
+
+    const tag = (issue.title || '').replace(/^\[.*?\]\s*/, '').trim();
+    if (tag && tag !== '메모') {
+      const tagEl = document.createElement('span');
+      tagEl.className = 'note-tag';
+      tagEl.textContent = tag;
+      meta.appendChild(tagEl);
+    }
+
+    const checkLabel = document.createElement('label');
+    checkLabel.className = 'note-check';
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = issue.state === 'closed';
+    checkbox.addEventListener('change', () => toggleState(issue.number, checkbox, li));
+    checkLabel.appendChild(checkbox);
+    checkLabel.appendChild(document.createTextNode('처리됨'));
+
+    top.appendChild(meta);
+    top.appendChild(checkLabel);
+
+    const body = document.createElement('p');
+    body.className = 'note-text';
+    body.textContent = issue.body || '';
+
+    li.appendChild(top);
+    li.appendChild(body);
+    return li;
+  }
+
+  function refreshCounts() {
+    const items = notesList.querySelectorAll('li.note').length;
+    noteCount.textContent = items;
+    emptyState.style.display = items === 0 ? 'block' : 'none';
+  }
+
+  async function loadNotes() {
+    loadingState.style.display = 'block';
+    try {
+      const res = await fetch(`${API}?labels=${LABEL}&state=all&per_page=100&sort=created&direction=desc`, { headers: ghHeaders() });
+      if (!handleAuthErrors(res)) return;
+      const issues = await res.json();
+      notesList.innerHTML = '';
+      issues.forEach(issue => notesList.appendChild(renderNote(issue)));
+      refreshCounts();
+    } catch (e) {
+      showError('메모를 불러오지 못했습니다: ' + e.message);
+    } finally {
+      loadingState.style.display = 'none';
+    }
+  }
+
+  function handleAuthErrors(res) {
+    if (res.status === 401) {
+      showError('토큰이 유효하지 않습니다. 토큰을 다시 설정해주세요.');
+      resetToSetup();
+      return false;
+    }
+    if (res.status === 403) {
+      showError('접근이 거부됐습니다 (권한 부족 또는 API 사용량 초과).');
+      return false;
+    }
+    if (res.status === 404) {
+      showError('저장소를 찾을 수 없습니다. 토큰에 zyongho/DieFile 저장소 접근 권한이 있는지 확인해주세요.');
+      return false;
+    }
+    if (!res.ok) {
+      showError(`GitHub API 오류 (${res.status})`);
+      return false;
+    }
+    clearError();
+    return true;
+  }
+
+  async function addNote() {
+    const text = composeText.value.trim();
+    if (!text) { composeText.focus(); return; }
+    const tag = composeTag.value.trim();
+    submitBtn.disabled = true;
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: tag ? `[메모] ${tag}` : '[메모]',
+          body: text,
+          labels: [LABEL],
+        }),
+      });
+      if (!handleAuthErrors(res)) return;
+      const issue = await res.json();
+      notesList.prepend(renderNote(issue));
+      refreshCounts();
+      composeText.value = '';
+      composeTag.value = '';
+      flashSaved();
+      composeText.focus();
+    } catch (e) {
+      showError('저장하지 못했습니다: ' + e.message);
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  async function toggleState(number, checkbox, li) {
+    const newState = checkbox.checked ? 'closed' : 'open';
+    checkbox.disabled = true;
+    try {
+      const res = await fetch(`${API}/${number}`, {
+        method: 'PATCH',
+        headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state: newState }),
+      });
+      if (!handleAuthErrors(res)) { checkbox.checked = !checkbox.checked; return; }
+      li.classList.toggle('closed', newState === 'closed');
+    } catch (e) {
+      showError('상태 변경에 실패했습니다: ' + e.message);
+      checkbox.checked = !checkbox.checked;
+    } finally {
+      checkbox.disabled = false;
+    }
+  }
+
+  function resetToSetup() {
+    localStorage.removeItem(TOKEN_KEY);
+    app.style.display = 'none';
+    appFooter.style.display = 'none';
+    setup.style.display = 'block';
+    tokenInput.value = '';
+    tokenInput.focus();
+  }
+
+  function enterApp() {
+    setup.style.display = 'none';
+    app.style.display = 'block';
+    appFooter.style.display = 'flex';
+    loadNotes();
+  }
+
+  saveTokenBtn.addEventListener('click', () => {
+    const t = tokenInput.value.trim();
+    if (!t) { tokenInput.focus(); return; }
+    localStorage.setItem(TOKEN_KEY, t);
+    enterApp();
+  });
+  tokenInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveTokenBtn.click(); });
+
+  clearTokenBtn.addEventListener('click', () => {
+    if (confirm('이 브라우저에 저장된 토큰을 삭제할까요?')) resetToSetup();
+  });
+
+  submitBtn.addEventListener('click', addNote);
+  composeText.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); addNote(); }
+  });
+
+  if (token()) enterApp(); else setup.style.display = 'block';
+</script>
+</body>
+</html>
